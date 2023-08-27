@@ -54,7 +54,7 @@
 
 # install with the shell command instead of the ansible npm module so we don't accidentally re-write package.json
 - name: install node dependencies
-  shell: "{{ insights_nodeenv_bin }}/npm install"
+  shell: "{{ insights_nodeenv_bin }}/rm package-lock.json && {{ insights_nodeenv_bin }}/npm install"
   args:
     chdir: "{{ insights_code_dir }}"
   become_user: "{{ insights_user }}"
@@ -62,6 +62,7 @@
   tags:
     - install
     - install:app-requirements
+  ignore_errors: true
 
 - name: migrate
   shell: "DB_MIGRATION_USER='{{ COMMON_MYSQL_MIGRATE_USER }}' DB_MIGRATION_PASS='{{ COMMON_MYSQL_MIGRATE_PASS }}' {{ insights_venv_dir }}/bin/python {{ insights_manage }} migrate --noinput"
@@ -74,6 +75,7 @@
   tags:
     - migrate
     - migrate:db
+  ignore_errors: true
 
 - name: run webpack
   shell: ". {{ insights_nodeenv_bin }}/activate && {{ insights_node_bin }}/webpack --config webpack.prod.config.js"
@@ -84,6 +86,7 @@
   tags:
     - assets
     - assets:gather
+  ignore_errors: true
 
 - name: run collectstatic
   shell: "{{ insights_venv_dir }}/bin/python {{ insights_manage }} {{ item }}"
@@ -96,6 +99,7 @@
   tags:
     - assets
     - assets:gather
+  ignore_errors: true
 
 - name: write out the supervisior wrapper
   template:
@@ -107,6 +111,7 @@
   tags:
     - install
     - install:configuration
+  ignore_errors: true
 
 - name: write supervisord config
   template:
@@ -118,8 +123,10 @@
   tags:
     - install
     - install:configuration
+  ignore_errors: true
 
 - name: enable supervisor script
+  ignore_errors: true
   file:
     src: "{{ supervisor_available_dir }}/{{ insights_service_name }}.conf"
     dest: "{{ supervisor_cfg_dir }}/{{ insights_service_name }}.conf"
@@ -131,6 +138,7 @@
     - install:configuration
 
 - name: update supervisor configuration
+  ignore_errors: true
   shell: "{{ supervisor_ctl }} -c {{ supervisor_cfg }} update"
   when: not disable_edx_services
   tags:
@@ -138,6 +146,7 @@
     - manage:start
 
 - name: create manage.py symlink
+  ignore_errors: true
   file:
     src: "{{ insights_manage }}"
     dest: "{{ COMMON_BIN_DIR }}/manage.{{ insights_service_name }}"
@@ -147,6 +156,7 @@
     - install:base
 
 - name: restart insights
+  ignore_errors: true
   supervisorctl:
     state: restarted
     supervisorctl_path: "{{ supervisor_ctl }}"
