@@ -211,6 +211,7 @@
   tags:
     - migrate
     - migrate:db
+  ignore_errors: true
 
 - name: run post-migrate commands
   command: "{{ item.command }}"
@@ -225,6 +226,7 @@
     - migrate
     - migrate:db
     - migrate:post
+  ignore_errors: true
 
 - name: ensure log files exist for tailing
   file:
@@ -236,6 +238,7 @@
   tags:
     - install
     - install:configuration
+  ignore_errors: true
 
 - name: write out the supervisor wrapper
   template:
@@ -247,6 +250,7 @@
   tags:
     - install
     - install:configuration
+  ignore_errors: true
 
 - name: write out the celery workers supervisor wrapper
   when: edx_django_service_enable_celery_workers
@@ -259,6 +263,7 @@
   tags:
     - install
     - install:configuration
+  ignore_errors: true
 
 - name: write supervisord config
   template:
@@ -270,6 +275,7 @@
   tags:
     - install
     - install:configuration
+  ignore_errors: true
 
 - name: write celery workers supervisord config
   when: edx_django_service_enable_celery_workers
@@ -282,6 +288,7 @@
   tags:
     - install
     - install:configuration
+  ignore_errors: true
 
 - name: write devstack script
   template:
@@ -294,6 +301,7 @@
   tags:
     - devstack
     - devstack:install
+  ignore_errors: true
 
 - name: setup the app env file
   template:
@@ -306,6 +314,7 @@
   tags:
     - install
     - install:configuration
+  ignore_errors: true
 
 - name: enable supervisor script
   file:
@@ -317,6 +326,7 @@
   tags:
     - install
     - install:configuration
+  ignore_errors: true
 
 - name: update supervisor configuration
   command: "{{ supervisor_ctl }} -c {{ supervisor_cfg }} update"
@@ -324,6 +334,7 @@
   tags:
     - manage
     - manage:start
+  ignore_errors: true
 
 - name: create symlinks from the repo dir
   file:
@@ -336,6 +347,7 @@
   tags:
     - install
     - install:app-requirements
+  ignore_errors: true
 
 - name: Check for existing make_static container
   command: "docker ps -aq --filter name='{{ edx_django_service_name }}.make_static'"
@@ -344,6 +356,7 @@
   tags:
     - install
     - install:system-requirements
+  ignore_errors: true
 
 - name: Delete existing make_static container
   when: edx_django_service_enable_experimental_docker_shim and edx_django_service_make_static_container.stdout != ""
@@ -356,6 +369,7 @@
   tags:
     - install
     - install:system-requirements
+  ignore_errors: true
 
 - name: compile static assets
   command: "{{ edx_django_service_docker_run_command_make_static }} make static"
@@ -367,6 +381,7 @@
   tags:
     - assets
     - assets:gather
+  ignore_errors: true
 
 - name: restart the application
   supervisorctl:
@@ -379,6 +394,7 @@
   tags:
     - manage
     - manage:start
+  ignore_errors: true
 
 - name: Copying nginx configs for the service
   template:
@@ -392,6 +408,7 @@
   tags:
     - install
     - install:vhosts
+  ignore_errors: true
 
 - name: Creating nginx config links for the service
   file:
@@ -405,6 +422,7 @@
   tags:
     - install
     - install:vhosts
+  ignore_errors: true
 
 #TODO jdmulloy docker build
 - name: Include JWT signature setting in the app config file
@@ -417,7 +435,9 @@
      app_config_owner: root
      app_config_group: root
      app_config_mode: 0644
+  ignore_errors: true
 
 - name: Create docker shim flag file
   command: "touch /edx/etc/docker_shim_enabled"
   when: edx_django_service_enable_experimental_docker_shim
+  ignore_errors: true
