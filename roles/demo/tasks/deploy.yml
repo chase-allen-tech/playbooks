@@ -15,18 +15,22 @@
     chdir: "{{ demo_edxapp_code_dir }}"
   become_user: "{{ common_web_user }}"
   when: demo_checkout.changed
+  ignore_errors: true
 
 - name: build staff and test user list
   set_fact:
     demo_test_and_staff_users: "{{ demo_test_users + [demo_staff_user] }}"
   when: DEMO_CREATE_STAFF_USER
+  ignore_errors: true
 
 - name: build staff and test user list
   set_fact:
     demo_test_and_staff_users: "{{ demo_test_users }}"
   when: not DEMO_CREATE_STAFF_USER
+  ignore_errors: true
 
 - name: build staff, admin, and test user list
+  ignore_errors: true
   set_fact:
     demo_test_admin_and_staff_users: "{{ demo_test_and_staff_users + SANDBOX_EDXAPP_USERS }}"
 
@@ -37,6 +41,7 @@
   become_user: "{{ common_web_user }}"
   with_items: "{{ demo_test_admin_and_staff_users }}"
   when: demo_checkout.changed
+  ignore_errors: true
 
 - name: enroll test users in the demo course
   shell: ". {{ demo_edxapp_env }} && {{ demo_edxapp_venv_bin }}/python ./manage.py lms --settings={{ demo_edxapp_settings }} --service-variant lms enroll_user_in_course -e {{ item.email }} -c {{ demo_course_id }}"
@@ -46,6 +51,7 @@
   with_items:
       - "{{ demo_test_and_staff_users }}"
   when: demo_checkout.changed
+  ignore_errors: true
 
 - name: add test users to the certificate whitelist
   shell: ". {{ demo_edxapp_env }} && {{ demo_edxapp_venv_bin }}/python ./manage.py lms --settings={{ demo_edxapp_settings }} --service-variant lms cert_whitelist -a {{ item.email }} -c {{ demo_course_id }}"
@@ -53,9 +59,11 @@
     chdir: "{{ demo_edxapp_code_dir }}"
   with_items: "{{ demo_test_users }}"
   when: demo_checkout.changed
+  ignore_errors: true
 
 - name: seed the forums for the demo course
   shell: ". {{ demo_edxapp_env }} && {{ demo_edxapp_venv_bin }}/python ./manage.py lms --settings={{ demo_edxapp_settings }} seed_permissions_roles {{ demo_course_id }}"
   args:
     chdir: "{{ demo_edxapp_code_dir }}"
   when: demo_checkout.changed
+  ignore_errors: true
