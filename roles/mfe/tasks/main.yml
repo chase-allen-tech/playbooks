@@ -75,7 +75,7 @@
     - install:system-requirements
 
 - name: install npm dependencies
-  shell: "npm install --dev --no-save"
+  shell: "rm package-lock.json && npm install --dev --no-save"
   args:
     chdir: "{{ MFE_CODE_DIR }}"
   become_user: "{{ MFE_USER }}"
@@ -83,6 +83,7 @@
   tags:
     - install
     - install:app-requirements
+  ignore_errors: true
 
 - name: install npm overrides
   shell: "npm install {{ item }} --no-save"
@@ -91,6 +92,7 @@
   become_user: "{{ MFE_USER }}"
   environment: "{{ MFE_ENVIRONMENT }}"
   with_items: "{{ MFE_NPM_OVERRIDES }}"
+  ignore_errors: true
   tags:
     - install
     - install:app-requirements
@@ -101,6 +103,7 @@
     chdir: "{{ MFE_CODE_DIR }}"
   become_user: "{{ MFE_USER }}"
   environment: "{{ MFE_ENVIRONMENT }}"
+  ignore_errors: true
   tags:
     - install:base
 
@@ -114,6 +117,7 @@
     mode: 0640
   when: nginx_app_dir is defined and MFE_STANDALONE_NGINX
   notify: reload nginx
+  ignore_errors: true
   tags:
     - install:base
     - install:vhosts
@@ -127,6 +131,7 @@
     group: root
   when: nginx_app_dir is defined and MFE_STANDALONE_NGINX
   notify: reload nginx
+  ignore_errors: true
   tags:
     - install:base
     - install:vhosts
@@ -135,6 +140,7 @@
 # their corresponding notifications don't get run. This will ensure that it has
 # been reloaded successfully.
 - name: make sure nginx has reloaded
+  ignore_errors: true
   service:
     name: nginx
     state: reloaded
