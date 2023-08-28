@@ -21,6 +21,7 @@
   tags:
     - install
     - install:app-requirements
+  ignore_errors: true
 
 - name: Create update script
   template:
@@ -33,6 +34,7 @@
   tags:
     - install
     - install:configuration
+  ignore_errors: true
 
 - name: Create symlinks for update script
   file:
@@ -43,6 +45,7 @@
   tags:
     - install
     - install:configuration
+  ignore_errors: true
 
 - name: Create utility scripts
   template:
@@ -57,6 +60,7 @@
   tags:
     - install
     - install:configuration
+  ignore_errors: true
 
 - name: Create symlinks for utility scripts
   file:
@@ -68,6 +72,7 @@
   tags:
     - install
     - install:configuration
+  ignore_errors: true
 
 - name: Create a symlink for ansible-playbook
   file:
@@ -77,6 +82,7 @@
   tags:
     - install
     - install:configuration
+  ignore_errors: true
 
 - name: Create a symlink for the playbooks dir
   file:
@@ -86,3 +92,4 @@
   tags:
     - install
     - install:configuration
+  ignore_errors: true
